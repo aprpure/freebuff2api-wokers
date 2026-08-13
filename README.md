@@ -5,13 +5,13 @@
 > 🎉 欢迎使用与交流！有任何问题或想法欢迎提 Issue / PR。
 > 开源协议：**[MIT](#-license)**
 
-把 **freebuff/codebuff** 的免费模型暴露成 **OpenAI-compatible API**。单文件无依赖，**推荐 Docker 容器部署**（或自建 VPS 运行），适配任意 OpenAI SDK / 客户端（QwenPaw、Hermes、ChatGPT-Next-Web、LobeChat、one-api 等）。
+把 **freebuff/codebuff** 的免费模型暴露成 **OpenAI-compatible API**。单文件无依赖，**云端推荐 Vercel**，自建推荐 Docker / VPS，适配任意 OpenAI SDK / 客户端（QwenPaw、Hermes、ChatGPT-Next-Web、LobeChat、one-api 等）。
 
-> ⚠️ **部署方式重要提示**：Freebuff 官方已检测 Cloudflare Worker 部署（识别 `cf-worker` / `cf-ray` 等边缘标记），**在 CF 上部署会显著增加账号被封禁的风险**。因此本项目**不推荐 Cloudflare 部署**，推荐使用 **Docker 容器**或自建 VPS 运行（见下方「[🐳 Docker 容器化部署](#-docker-容器化部署-推荐)」）。
+> ⚠️ **部署方式重要提示**：Freebuff 官方已检测 Cloudflare Worker 部署（识别 `cf-worker` / `cf-ray` 等边缘标记），**在 CF 上部署会显著增加账号被封禁的风险**。因此本项目**不推荐 Cloudflare 部署**。云端推荐 **[Vercel](#-vercel-部署推荐)**（无 CF 边缘标记，锁定美东 `iad1`）；需要长期进程、最大化 session 复用时，用 **[Docker / 自建 VPS](#-docker-容器化部署自建推荐)**。
 
 ## ✨ 特性
 
-- ⭐ **完整访问模式模型**：Cloudflare Workers 默认使用美国出口，通常可获得 Freebuff 完整访问模式；其中 DeepSeek V4 Flash 和 MiMo 2.5 属于官方特殊的非 Premium 模型
+- ⭐ **完整访问模式模型**：Vercel 默认锁定美东 `iad1` 出口（Docker / 自建请自行使用美国 IP），通常可获得 Freebuff 完整访问模式；其中 DeepSeek V4 Flash 和 MiMo 2.5 属于官方特殊的非 Premium 模型
 - 🔒 **常规模型基础额度**：除上述两个特殊模型外，普通模型按每日 6 次 session 的基础额度理解；不会宣传为无限量
 - 🔁 **多账号自动切换**：撞额度自动冷却并切换，逗号分隔即可
 - 💡 **优先复用活跃 session**：一个 session 约 1 小时有效，创建 session 才扣额度；只要当前模型的 session 还活跃就钉在同一账号上，用满再换，最大化额度利用率
@@ -19,7 +19,7 @@
 - 🧩 **OpenAI 兼容**：`/v1/models`、`/v1/chat/completions`、`/v1/responses`（流式/非流式视接口支持情况而定）
 - 📨 **Anthropic Messages API**：支持 `/v1/messages`、`/messages` 及对应的 `count_tokens` 路由，可供 Anthropic SDK / 兼容客户端尝试接入
 - ❤️ **健康检查**：`GET /healthz`（免鉴权），方便监控探活
-- 📦 **单文件部署**：无依赖，`worker.js` 一处代码，CF / Docker / VPS 通用
+- 📦 **单文件部署**：无依赖，`worker.js` 一处代码，Vercel / Docker / VPS / CF 通用
 
 ## 📨 Anthropic Messages API 支持
 
@@ -42,14 +42,14 @@
 
 ## ⭐ 特殊模型：DeepSeek V4 Flash 与 MiMo 2.5
 
-Worker 通过 Cloudflare Workers 访问 Freebuff，上游通常会将请求识别为美国/完整访问模式。官方 Desktop 在完整模式下将下面两个模型归入 **unlimited 非 Premium 类别**；这里的 `unlimited` 主要表示模型分类和并发类别，**不是对所有账号、地区、接口和时间都作绝对无限量保证**：
+默认部署走美国出口（Vercel `iad1` / 美区 VPS），上游通常会将请求识别为美国/完整访问模式。官方 Desktop 在完整模式下将下面两个模型归入 **unlimited 非 Premium 类别**；这里的 `unlimited` 主要表示模型分类和并发类别，**不是对所有账号、地区、接口和时间都作绝对无限量保证**：
 
 | 模型 | 完整模式下的说明 |
 |---|---|
 | `deepseek/deepseek-v4-flash` | 官方非 Premium 模型；主力推荐，当前 Worker 探测未显示基础日限额 |
 | `mimo/mimo-v2.5` | 官方非 Premium 模型；当前 Worker 探测未显示基础日限额 |
 
-> ⚠️ 受限模式官方明确为 DeepSeek V4 Flash 和 MiMo 2.5 每天 6 个一小时 session；Worker 默认走美国出口，通常不属于该受限模式。最终是否可用及实际额度仍以 Freebuff 上游返回为准，官方规则也可能调整。
+> ⚠️ 受限模式官方明确为 DeepSeek V4 Flash 和 MiMo 2.5 每天 6 个一小时 session；默认走美国出口时通常不属于该受限模式。最终是否可用及实际额度仍以 Freebuff 上游返回为准，官方规则也可能调整。
 
 除这两个特殊模型外，普通模型统一按 **每日 6 次基础 session / 太平洋日** 理解（北京时间约 15:00 重置）。`referral`、`streak`、独立共享池和上游临时限制属于额外条件，不能据此宣传为无限量。
 
@@ -60,26 +60,26 @@ Worker 通过 Cloudflare Workers 访问 Freebuff，上游通常会将请求识�
 ## 🚀 快速开始
 
 1. 获取 freebuff token（见下方「获取 FREEBUFF_TOKEN」）
-2. 部署服务（见下方「部署」，**推荐 Docker 容器部署**）
+2. 部署服务（见下方「部署」，**云端推荐 Vercel**，自建推荐 Docker）
 3. 配置环境变量：
    - `FREEBUFF_TOKEN`（必需）= 你的 token
    - `FREEBUFF_API_KEY`（可选）= 自定义访问 key，缺省 `freebuff-default-key`
 4. 用任意 OpenAI 客户端连接：
-   - **Base URL**: `http://localhost:8877/v1`（Docker 部署）或 `https://你的worker名.你的子域.workers.dev/v1`（CF 部署，不推荐）
+   - **Base URL**: `https://你的项目.vercel.app/v1`（Vercel）或 `http://localhost:8877/v1`（Docker）
    - **API Key**: `<FREEBUFF_API_KEY 的值>`
 
-> 🌐 **自定义域名**：如果 `*.workers.dev` 域名访问不通（部分地区被墙/受限），可给 Worker 绑定自己的域名，Base URL 改为 `https://你的域名/v1`。配置方法见下方「[自定义域名](#-自定义域名)」。
+> 🌐 **自定义域名**：Vercel 可在项目 Settings → Domains 绑定自己的域名，Base URL 改为 `https://你的域名/v1`。CF `workers.dev` 访问不通时的绑定方法见下方「[自定义域名](#-自定义域名)」。
 
 ## ❤️ 健康检查
 
 部署后可用（**无需 API key**）：
 
 ```bash
-curl https://你的worker.workers.dev/healthz
-# {"status":"ok","version":"1.4.0","time":"..."}
+curl https://你的项目.vercel.app/healthz
+# {"status":"ok","version":"1.8.9","time":"..."}
 ```
 
-- `version` 字段=当前部署的版本号，**每次部署版本号都会变化**，用于确认线上是否已更新（CF 边缘缓存有延迟，验证时等几秒或加随机参数）
+- `version` 字段=当前部署的版本号，**每次部署版本号都会变化**，用于确认线上是否已更新
 - 适合接入 UptimeRobot / 自建监控探活
 
 ## 🔑 获取 FREEBUFF_TOKEN
@@ -131,9 +131,58 @@ python3 extract_freebuff.py chat "你好"      # 发一条消息测试模型 API
 
 ## 🛠️ 部署
 
-### 🐳 Docker 容器化部署（✅ 推荐）
+### ▲ Vercel 部署（✅ 云端推荐）
 
-> 适合本地/NAS/VPS 长期运行：不受 Cloudflare Workers 限制，**不会暴露 CF 边缘标记**（`cf-worker` / `cf-ray`），账号封禁风险显著低于 CF 部署；同一套代码也可在 CF 运行（不推荐）。
+> 无框架、单函数转发 `worker.js`。开启 Fluid Compute，锁定美东 `iad1`，公开路径仍是 `/healthz`、`/v1/...`（`vercel.json` 已 rewrite）。**不要把 token 写进仓库或 `vercel.json`。**
+
+**方式 A：网页导入（推荐）**
+
+1. 打开 [vercel.com/new](https://vercel.com/new)，导入本仓库
+2. Framework Preset 选 **Other**，构建命令留空
+3. 部署前先加环境变量（Project → Settings → Environment Variables），Production / Preview / Development 都勾上：
+
+   | 变量 | 必需 | 说明 |
+   |---|---|---|
+   | `FREEBUFF_TOKEN` | 是 | freebuff token，多账号用英文逗号或换行分隔 |
+   | `FREEBUFF_API_KEY` | 否 | 本 API 访问 key，缺省 `freebuff-default-key` |
+   | `FREEBUFF_DEBUG` | 否 | `true` 开启请求级调试日志 |
+   | `CODEBUFF_API` | 否 | 自建中继域名；空=直连官方 |
+   | `RELAY_KEY` | 否 | 中继鉴权密钥 |
+
+4. Deploy。确认 Functions 区域为 **Washington, D.C., USA (`iad1`)**，Fluid Compute 开启
+5. 部署完成后：
+
+   ```bash
+   curl https://你的项目.vercel.app/healthz
+   curl https://你的项目.vercel.app/v1/models \
+     -H "Authorization: Bearer <FREEBUFF_API_KEY>"
+   ```
+
+6. 客户端 Base URL：`https://你的项目.vercel.app/v1`
+
+**方式 B：CLI**
+
+```bash
+npx vercel login
+npx vercel          # 预览环境，按提示关联项目
+npx vercel env add FREEBUFF_TOKEN
+npx vercel env add FREEBUFF_API_KEY
+npx vercel --prod   # 生产环境
+```
+
+本地联调：`npx vercel dev`，默认 `http://localhost:3000`。
+
+**注意：**
+
+- session / 冷却 / 串行队列存在函数内存里。Fluid 会复用 isolate，但冷启动或扩出新实例后缓存会空，比 Docker 更容易新建 session、消耗额度
+- 多实例并发可能触发上游单账号单会话限制（`428 waiting_room_required`）
+- Hobby Fluid 最长 300s（已写入 `maxDuration`）；Pro 可在 `vercel.json` 里再加大
+- 出口是 Vercel 美东共享 IP，没有 `cf-ray` / `cf-worker`，但不如自建美区 VPS 稳定
+- 自定义域名：Project → Settings → Domains
+
+### 🐳 Docker 容器化部署（✅ 自建推荐）
+
+> 适合本地/NAS/VPS 长期运行：进程常驻，session 复用最好；**不会暴露 CF 边缘标记**（`cf-worker` / `cf-ray`）。需要公网 HTTPS 且不想养机器时，优先用上面的 Vercel。
 
 **快速部署：**
 
@@ -229,19 +278,19 @@ worker 是**单文件**（`worker.js`），如仍需在 CF 部署：
 
 ```bash
 # 健康检查
-curl https://你的worker.workers.dev/healthz
+curl https://你的项目.vercel.app/healthz
 
 # 模型列表
-curl https://你的worker.workers.dev/v1/models \
+curl https://你的项目.vercel.app/v1/models \
   -H "Authorization: Bearer <API_KEY>"
 
 # 非流式
-curl https://你的worker.workers.dev/v1/chat/completions \
+curl https://你的项目.vercel.app/v1/chat/completions \
   -H "Authorization: Bearer <API_KEY>" -H "Content-Type: application/json" \
   -d '{"model":"deepseek/deepseek-v4-flash","messages":[{"role":"user","content":"你好"}]}'
 
 # 流式
-curl -N https://你的worker.workers.dev/v1/chat/completions \
+curl -N https://你的项目.vercel.app/v1/chat/completions \
   -H "Authorization: Bearer <API_KEY>" -H "Content-Type: application/json" \
   -d '{"model":"deepseek/deepseek-v4-flash","messages":[{"role":"user","content":"你好"}],"stream":true}'
 ```
@@ -249,7 +298,7 @@ curl -N https://你的worker.workers.dev/v1/chat/completions \
 ## 📋 模型列表
 
 > 映射来源：Freebuff Desktop 0.0.51（`orchestrator.js` 官方 `FREEBUFF_ROOT_AGENT_ID_BY_MODEL`，2026-08-07 实测同步）。
-> Worker 通过 Cloudflare Workers 访问上游，默认使用美国出口，按 Freebuff 完整访问模式说明。除 Flash 和 MiMo 这两个官方特殊的非 Premium 模型外，其余模型按**每日 6 次基础 session / 太平洋日**理解（北京时间约 15:00 重置）；额度按「创建 session」扣减，一个 session 约 1 小时有效。
+> 默认走美国出口（Vercel `iad1` / 美区 VPS），按 Freebuff 完整访问模式说明。除 Flash 和 MiMo 这两个官方特殊的非 Premium 模型外，其余模型按**每日 6 次基础 session / 太平洋日**理解（北京时间约 15:00 重置）；额度按「创建 session」扣减，一个 session 约 1 小时有效。
 
 ### ⭐ 完整模式特殊模型：非 Premium
 

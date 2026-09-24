@@ -1,4 +1,4 @@
-# Freebuff 可用模型（2026-09-25 00:39:43 北京时间）
+# Freebuff 可用模型（2026-09-25 05:14:36 北京时间）
 
 > 自动生成 · 来源：[CodebuffAI/freebuff](https://github.com/CodebuffAI/freebuff) main · 更新频率：每 6 小时
 
@@ -29,7 +29,6 @@
 - `openai/gpt-5.4-pro` —— openai/gpt-5.4-pro
 - `openai/gpt-5.5` —— openai/gpt-5.5
 - `openai/gpt-5.5-pro` —— openai/gpt-5.5-pro
-- `openai/gpt-5.6-luna` —— GPT-5.6 Luna（OpenAI 最新，推理顶尖）
 - `openai/gpt-5.6-luna-es` —— openai/gpt-5.6-luna-es
 - `openai/gpt-5.6-luna-pro` —— openai/gpt-5.6-luna-pro
 - `openai/gpt-5.6-sol` —— openai/gpt-5.6-sol
@@ -66,4 +65,4 @@
 
 
 ---
-共 54 个模型 · 上次更新：2026-09-25 00:39:43
+共 53 个模型 · 上次更新：2026-09-25 05:14:36

@@ -1,4 +1,4 @@
-# Freebuff 可用模型（2026-10-07 06:25:50 北京时间）
+# Freebuff 可用模型（2026-10-07 12:47:23 北京时间）
 
 > 自动生成 · 来源：[CodebuffAI/freebuff](https://github.com/CodebuffAI/freebuff) main · 更新频率：每 6 小时
 
@@ -59,6 +59,7 @@
 - `x-ai/grok-4.6` —— x-ai/grok-4.6
 - `x-ai/grok-4.7` —— x-ai/grok-4.7
 - `z-ai/glm-5-turbo` —— z-ai/glm-5-turbo
+- `z-ai/glm-5.2` —— GLM 5.2（智谱 AI，推荐解锁后使用）
 - `z-ai/glm-5.3` —— z-ai/glm-5.3
 - `z-ai/glm-5.3-flash` —— z-ai/glm-5.3-flash
 - `z-ai/glm-5.3-flashx` —— z-ai/glm-5.3-flashx
@@ -68,4 +69,4 @@
 
 
 ---
-共 56 个模型 · 上次更新：2026-10-07 06:25:50
+共 57 个模型 · 上次更新：2026-10-07 12:47:23
